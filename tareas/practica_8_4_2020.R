@@ -1,0 +1,7 @@
+rm(list = ls())
+load(url("https://github.com/AlvaroLimber/EST-384/blob/master/data/eh18.Rdata?raw=true"))
+View(eh18p)
+table(eh18p)
+names(eh18p)
+View(eh18v)
+names(eh18v)
