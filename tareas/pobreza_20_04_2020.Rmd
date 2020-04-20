@@ -1,0 +1,58 @@
+---
+title: "pobreza encuesta eh2018"
+author: "Enrique Laurel"
+date: "20/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Pobreza
+
+Iniciamos identificando a la población pobre en el país
+
+```{r,echo=FALSE,message=FALSE}
+library(knitr)
+load(url("https://github.com/AlvaroLimber/EST-384/blob/master/data/eh18.Rdata?raw=true"))
+t1<-table(eh18p$niv_ed,eh18p$p0)
+t2<-table(eh18p$niv_ed,eh18p$pext0)
+t1<-round(prop.table(t1,1)*100,2)
+t2<-round(prop.table(t2,1)*100,2)
+kable(t1,caption = "(%) Pobreza moderada por nivel educativo, EH-2018")
+kable(t2,caption = "(%) Pobreza extrema por nivel educativo, EH-2018")
+
+plot(t1)
+barplot(t(t2))
+#a nivel poblacional 
+library(survey)
+sd1<-svydesign(ids=~upm,strata = ~estrato,weights = ~factor,data = eh18p)
+t1inf<-svytable(~niv_ed+p0,design=sd1)
+t1inf<-round(t1inf,0)
+t2inf<-svytable(~niv_ed+pext0,design=sd1)
+t2inf<-round(t2inf,0)
+#proporciones
+t1inf<-round(prop.table(t1inf,1)*100,2)
+t2inf<-round(prop.table(t2inf,1)*100,2)
+#t1inf<-addmargins(t1inf,c(1,2))
+#colnames(t3)<-c("Sin diabetes","Con diabetes","Total")
+#rownames(t3)[10]<-"Total"
+kable(t1inf,caption = "Población de pobreza en Bolivia, por nivel de educacion, EH-2018")
+kable(t2inf,caption = "Población de pobreza extrema en Bolivia, por nivel de educacion, EH-2018")
+#library(kableExtra)
+#kable(t1inf) %>%
+  #kable_styling("striped", full_width = F) %>%
+  #row_spec(0, angle = -45)
+plot(t1inf,main = "% pobreza en bolivia por nivel de educacion",
+     xlab = "nivel de educacion",ylab = "pobreza",col= c("royalblue", "grey"))
+legend(x = "right", legend = c("No pobre", "pobre"), fill = c("royalblue", "grey"), 
+       title = "categoria")
+barplot(t(t2inf),main = "% pobreza extrema en bolivia por nivel de educacion",
+        xlab = "nivel de educacion",ylab = "pobreza extrema",col = c("royalblue", "grey"))
+legend(x = "right", legend = c("No pobre", "pobre extremo"), fill = c("royalblue", "grey"), 
+       title = "categoria")
+
+library(vcd)
+mosaic(t1inf)  
+```
