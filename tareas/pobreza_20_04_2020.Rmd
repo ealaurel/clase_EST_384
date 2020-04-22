@@ -35,24 +35,23 @@ t2inf<-round(t2inf,0)
 #proporciones
 t1inf<-round(prop.table(t1inf,1)*100,2)
 t2inf<-round(prop.table(t2inf,1)*100,2)
-#t1inf<-addmargins(t1inf,c(1,2))
-#colnames(t3)<-c("Sin diabetes","Con diabetes","Total")
-#rownames(t3)[10]<-"Total"
+
 kable(t1inf,caption = "Población de pobreza en Bolivia, por nivel de educacion, EH-2018")
 kable(t2inf,caption = "Población de pobreza extrema en Bolivia, por nivel de educacion, EH-2018")
-#library(kableExtra)
-#kable(t1inf) %>%
-  #kable_styling("striped", full_width = F) %>%
-  #row_spec(0, angle = -45)
-plot(t1inf,main = "% pobreza en bolivia por nivel de educacion",
+
+#graficos
+plot(t1inf,main = "% pobreza en bolivia por nivel de educacion",las = 2,
+     cex.names=0.7,
      xlab = "nivel de educacion",ylab = "pobreza",col= c("royalblue", "grey"))
 legend(x = "right", legend = c("No pobre", "pobre"), fill = c("royalblue", "grey"), 
        title = "categoria")
-barplot(t(t2inf),main = "% pobreza extrema en bolivia por nivel de educacion",
-        xlab = "nivel de educacion",ylab = "pobreza extrema",col = c("royalblue", "grey"))
-legend(x = "right", legend = c("No pobre", "pobre extremo"), fill = c("royalblue", "grey"), 
-       title = "categoria")
 
-library(vcd)
-mosaic(t1inf)  
+par(mai=c(1,3,1,1))
+barplot(t(t2inf),main = "% pobreza extrema en bolivia por nivel de educacion",las =1,
+        horiz = T,
+        xlab = "pobreza extrema",col = c("royalblue", "grey"))
+legend(x = "left", legend = c("No pobre", "pobre extremo"), fill = c("royalblue", "grey"), 
+       title = "categoria")
+dev.off()
+
 ```
