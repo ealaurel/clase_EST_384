@@ -1,0 +1,45 @@
+---
+title: "Modelos Lineales"
+author: "ENRIQUE"
+date: "10/7/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#Modelos Lineales
+##paso 1: base de datos
+```{r}
+library(dplyr)
+load("C:\\Users\\Dell\\Documents\\GitHub\\EST-384\\data\\eh18.RData")
+attributes(eh18p)$variable.labels
+names(eh18p)
+eh18p$ocupado
+bd<-eh18p %>% filter(s02a_03>=18 & s02a_05 =="1.JEFE O JEFA DEL HOGAR" & ocupado=="Si") %>% select(s02a_02,s02a_03,aestudio,ylab,tothrs,ynolab,factor,estrato,upm,area,permanente,cob_op)
+
+
+```
+##paso 2 :establecer la relaciond e interes
+```{r}
+#y: una variable que debe ser un resultado directo
+#x: indepenedientes
+```
+##paso 3_: definir el modelo a utilizar
+```{r}
+install.packages("normtest")
+library(normtest)
+install.packages("MASS")
+install.packages("car")
+install.packages("lmtest")
+```
+#modelos de regresion
+##propit y logit 
+```{r}
+install.packages("mfx")
+install.packages("DescTools")
+install.packages("memisc")
+```
+

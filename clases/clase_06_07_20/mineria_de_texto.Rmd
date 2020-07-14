@@ -1,0 +1,166 @@
+---
+title: "mineria de texto"
+author: "ENRIQUE"
+date: "6/7/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#mineria de texto
+
+```{r}
+library(tm)
+library(dplyr)
+setwd("C:\\Users\\Dell\\Documents\\GitHub\\clase_EST_384\\clases\\clase_06_07_20")
+fb<-read.csv("bd_sc.csv")
+fb<-read.csv("bd_sc.csv",encoding = "UTF-8")
+#fb<-read.csv("bd_sc.csv",encoding = "Latin-1")
+fb$post_text[5]
+
+```
+coleccion de documentos
+```{r, eval=FALSE}
+library(pdftools)
+dir<-"C:\\Users\\Dell\\Documents\\GitHub\\clase_EST_384\\clases\\clase_06_07_20"
+pdfdocs<-VCorpus(DirSource(dir,pattern = ".pdf"),
+                 readerControl = list(reader =readPDF))
+```
+### TWITTER (API)
+```{r}
+#install.packages("rtweet")
+library(rtweet)
+tw<-search_tweets("Dioxido de Cloro",n=10000,include_rts = F)
+tw
+```
+## Nubes de palabras 
+
+```{r,eval=FALSE}
+#install.packages("wordcloud2")
+library(wordcloud2)
+nube<-function(aux){
+    docs<-Corpus(VectorSource(aux))
+    docs <- docs %>%
+      tm_map(removeNumbers) %>%
+      tm_map(removePunctuation) %>%
+      tm_map(stripWhitespace)
+    docs <- tm_map(docs, content_transformer(tolower))
+    docs <- tm_map(docs, removeWords, stopwords("sp"))
+    dtm <- TermDocumentMatrix(docs) 
+    matrix <- as.matrix(dtm) 
+    words <- sort(rowSums(matrix),decreasing=TRUE) 
+    df <- data.frame(word = names(words),freq=words)	
+    return(df)
+}
+nube2<-function(aux){
+    docs <- aux %>%
+      tm_map(removeNumbers) %>%
+      tm_map(removePunctuation) %>%
+      tm_map(stripWhitespace)
+    docs <- tm_map(docs, content_transformer(tolower))
+    docs <- tm_map(docs, removeWords, stopwords("sp"))
+    dtm <- TermDocumentMatrix(docs) 
+    matrix <- as.matrix(dtm) 
+    words <- sort(rowSums(matrix),decreasing=TRUE) 
+    df <- data.frame(word = names(words),freq=words)	
+    return(df)
+}
+```
+
+Sobre los tipos de datos
+```{r,eval=FALSE}
+#csv
+df<-nube(fb$post_text)
+wordcloud2(data=df,color='random-dark',size = 0.4,shape = 'pentagon')
+#colección de documentos
+df<-nube2(pdfdocs)
+wordcloud2(data=df,color='random-dark',size = 0.4,shape = 'pentagon')
+#scrape
+df<-nube(tw$text)
+wordcloud2(data=df[df$freq>1,],color='random-dark',shape = 'pentagon')
+
+library(wordcloud)
+wordcloud(df$word,freq=df$freq)
+```
+
+
+```{r,eval=F}
+library(ggplot2)
+#install.packages("ggthemes")
+library(ggthemes)
+docs<-VCorpus(VectorSource(fb$text))
+docs <- docs %>%
+      tm_map(removeNumbers) %>%
+      tm_map(removePunctuation) %>%
+      tm_map(stripWhitespace)
+    docs <- tm_map(docs, content_transformer(tolower))
+    docs <- tm_map(docs, removeWords, stopwords("sp"))
+tdm<-TermDocumentMatrix(docs) 
+associations<-findAssocs(tdm, 'evo', 0.55)
+associations<-as.data.frame(associations)
+associations$terms<-row.names(associations)
+associations$terms<-factor(associations$terms,
+levels=associations$terms)
+
+names(associations)[1]<-"palabra"
+ggplot(associations, aes(y=terms)) +
+geom_point(aes(x=palabra), data=associations,
+size=5)+
+theme_gdocs()+ geom_text(aes(x=palabra,
+label=palabra),
+colour="darkred",hjust=-.25,size=8)+
+theme(text=element_text(size=20),
+axis.title.y=element_blank())
+```
+
+#analisis de sentimiento
+### Polarización en QDAP
+
+```{r,eval=F}
+#solo ingles
+library(qdap)
+library(rtweet)
+tw<-search_tweets("Bolivia",n=100,include_rts = F,lang="en")
+detach(package:dplyr, unload=TRUE)
+detach(package:rtweet, unload=TRUE)
+detach(package:qdap, unload=TRUE)
+`[[.qdap_hash` <- `[[.data.frame`
+tw$text<-removePunctuation(tw$text)
+score<-polarity(tw$text[1:2])
+
+```
+
+### Librería syuzhet
+
+```{r,eval=F}
+#install.packages("syuzhet")
+library(syuzhet)
+library(rtweet)
+tw<-search_tweets("coronavirus",n=1000,include_rts = F,lang="es")
+ww<-get_sentiment_dictionary("nrc",language = "spanish")#guardar nrc lexicon
+aa<-get_nrc_sentiment(tw$text,language = "spanish")
+apply(aa,2,sum)
+barplot(apply(aa,2,sum),horiz = T,las=1)
+#ampliar el léxico
+ww<-rbind(ww,c("spanish","xxxx","negative","1"))
+tail(ww)
+get_nrc_sentiment
+#tarea 
+```
+#modoficar la funcion que ghace analisis de sentimiento para añadir nuevas palabras que hagan el analisis
+
+```{r}
+lexicon <- dplyr::filter_(nrc, ~lang == language)
+nrc_data <- lapply(word_l, get_nrc_values, lexicon = lexicon)
+get_nrc_values
+nrc
+```
+
+
+
+
+
+

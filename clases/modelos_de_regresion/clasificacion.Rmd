@@ -1,0 +1,42 @@
+---
+title: "CLASIFICACION"
+author: "ENRIQUE"
+date: "11/7/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#CLASIfICACION
+```{r}
+rm(list = ls())
+library(dplyr)
+covid<-read.csv("C:\\Users\\Dell\\Documents\\GitHub\\EST-384\\data\\covid_mx\\200627COVID19MEXICO.csv",sep=",",na.strings=c(99,98))
+attributes(covid)
+covid<-covid %>% filter(EDAD<=90)
+#descripcion
+#install.packages("Hmisc")
+Hmisc::describe(covid)
+#variable muerte (para clasificarlos)
+covid$muerte<-(covid$FECHA_DEF!="9999-99-99")
+covid<-covid %>% select(-FECHA_DEF) 
+#covid<-na.omit(covid)
+str(covid)
+covid$SEXO<-factor(covid$SEXO,levels = 1:2,labels = c("mujer","hombre"))
+str(covid)
+
+```
+# metodo CART
+```{r}
+install.packages("rpart.plot")
+install.packages("caret")
+library(rpart)
+```
+#naive bayes
+```{r}
+install.packages("e1071")
+```
+

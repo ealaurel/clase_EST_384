@@ -1,0 +1,95 @@
+---
+title: "pregunta_2"
+author: "ENRIQUE"
+date: "11/7/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Usando la ENDSA para el 2008 para el corte de edad de 20 a 40 años, para la variable fumar; elabore un
+modelo de clasificación usando los métodos:
+• Logístico
+• Árbol de clasificación
+• Naive Bayes
+1
+Considere al menos 10 covariables para la elaboración de los métodos. Comente el mejor método de
+clasificación, justifique su respuesta.
+```{r}
+load("C:\\Users\\Dell\\Documents\\GitHub\\EST-384\\data\\endsa.RData")
+library(dplyr)
+bd2<-endsa %>% filter(edad>=20 & edad<=40)
+attributes(endsa)
+str(endsa)
+table(bd2[,15])
+str(bd2)
+bd2<-bd2[,c(3,6,7,10,11,12,13,14,15,16,23)]
+bd2<-na.omit(bd2)
+bd2_2<-bd2
+#aux<-c(  "depto",  "area" ,  "year" ,  "edad" ,  "sexo" ,  "ae01",  
+ # "ae02"  , "ae03"  , "ae04"  , "ae05"  , "ae06"  , "ae07"  , "ae08",  
+ #"ae09" )
+#for(i in aux){
+ # bd2[[i]]<-bd2[[i]]==1
+#}
+str(bd2)
+table(bd2$ae09)
+#table(bd2$vf10)
+#base de test y entrenamiento
+set.seed(123)
+index = sample(1:2, nrow(bd2), replace = TRUE, prob=c(0.7, 0.3))
+prop.table(table(index))
+trainbd_l<-bd2[index==1,]
+testbd_l<-bd2[index==2,]
+
+m1l<-glm(ae09~.,data=trainbd_l,family = binomial(link="logit"))
+m2l<-step(m1l)
+summary(m2l)
+
+clase_l<-predict(m2l,testbd_l,type="response")>0.5
+table(clase_l)
+
+table(testbd_l$ae09,clase_l)
+
+library(caret)
+confusionMatrix(table(testbd_l$ae09,clase_l))
+```
+#arbol de clasificacion
+```{r}
+library(rpart)
+
+index = sample(1:2, nrow(bd2_2), replace = TRUE, prob=c(0.7, 0.3))
+prop.table(table(index))
+trainbd<-bd2_2[index==1,]
+testbd<-bd2_2[index==2,]
+
+m1a<-rpart(ae09~.,data=trainbd)
+
+m1a
+
+clase_a<-predict(m1a,testbd,type = "class")
+
+table(clase_a,testbd$ae09)
+library(caret)
+confusionMatrix(table(clase_a,testbd$ae09))
+```
+#naive bayes
+```{r}
+bd2_3<-bd2_2
+
+index = sample(1:2, nrow(bd2_3), replace = TRUE, prob=c(0.7, 0.3))
+prop.table(table(index))
+trainbd_n<-bd2_2[index==1,]
+testbd_n<-bd2_2[index==2,]
+library(e1071)
+m1n<-naiveBayes(ae09~.,data=trainbd_n)
+clase_n<-predict(m1n,testbd_n,type = "class")
+
+confusionMatrix(table(clase_n,testbd_n$ae09))
+```
+# comentarios
+el mejor metodo en este caso podemos notar que es CART por tener una acuracidad del 74% mas alta de las demas

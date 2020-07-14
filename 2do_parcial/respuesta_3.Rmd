@@ -1,0 +1,60 @@
+---
+title: "pregunta_3"
+author: "ENRIQUE"
+date: "11/7/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Seleccione solo una de las siguientes fuentes de información:
+1. Usando la API de twitter genere una base de datos de los 1000 últimos post de la palabra “coronavirus”,
+sin retweets, en español.
+2. Colección de 3 tesis en pdf del enlace https://repositorio.umsa.bo/handle/123456789/7292
+A partir de esta base realice de forma secuencial:
+• Establezca el Corpus
+• Ponga las palabras en mayúsculas
+• Elimine los números y la puntuación
+• Elimine los stopwords en español e incluya 3 palabras definidas por usted para su eliminación
+• Realice una nube de palabras y comente los hallazgos
+• Realice el análisis de sentimiento y grafique 2 figuras; una para las ocho emociones y otra para los
+sentimientos positivos y negativos
+```{r}
+library(syuzhet)
+library(rtweet)
+library(qdap)
+library(pdftools)
+library(wordcloud2)
+library(tm)
+tw<-search_tweets("coronavirus",n=1000,include_rts = F,lang="es")
+
+docs<-Corpus(VectorSource(tw$text))
+
+
+docs_2 <- tm_map(docs, content_transformer(toupper))
+
+docs_2 <- docs_2 %>%
+      tm_map(removeNumbers) %>%
+      tm_map(removePunctuation) 
+tw$text[1]
+docs_2 <- tm_map(docs_2, removeWords, stopwords("sp"))
+docs_2 <- tm_map(docs_2, removeWords, stopwords("en"))
+docs_2 <- tm_map(docs_2, removeWords, stopwords("english"))
+
+dtm <- TermDocumentMatrix(docs_2) 
+    matrix <- as.matrix(dtm) 
+    words <- sort(rowSums(matrix),decreasing=TRUE) 
+    df <- data.frame(word = names(words),freq=words)
+
+wordcloud2(data=df[df$freq>5,],color='random-dark',size = 0.4,shape = 'star')
+
+aa<-get_nrc_sentiment(tw$text,language = "spanish")
+barplot(apply(aa,2,sum),horiz = T,las=1)
+
+barplot(apply(aa,2,sum),horiz = T,las=1)
+
+```
+
