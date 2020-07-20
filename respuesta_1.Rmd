@@ -1,0 +1,68 @@
+---
+title: "respuesta_1"
+author: "ENRIQUE"
+date: "17/7/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Primer Parcial
+Pregunta 1 (15 pts.)
+• PCA: Empleando la base de datos de las elecciones nacionales del 20 de octubre de 2019, seleccione las
+mesas para Bolivia y las elecciones para presidente.
+– Convierta los valores absolutos a valores relativos para los partidos políticos, incluya blancos y
+nulos.
+– Aplique el método de componentes principales y aplique el criterio de eigenvectores superiores a 1
+para retener los componentes.
+– Calcule los componentes retenidos e inclúyalos en la base de datos
+– Genere un gráfico de histogramas para ver la distribución de los componentes retenidos
+
+```{r}
+load(url("https://github.com/AlvaroLimber/EST-384/blob/master/data/oct20.RData?raw=true"))
+
+library(dplyr)
+
+#filtrar los casos
+aux<-c("CC","FPV","MTS","UCS","MAS - IPSP","21F","PDC","MNR","PAN-BOL","Blancos","Nulos")               
+#names(computo)[1]<-"pais"
+#names(computo)[12]<-"eleccion"
+bd<-computo %>% filter(País=="Bolivia" & Elección=="Presidente y Vicepresidente") %>% select(aux)
+#bd<-prop.table(bd)
+
+sf<-apply(bd, 1, sum)
+
+
+bd1<-bd/sf
+bd1
+bd2<-na.omit(bd1)
+
+cp1<-eigen(cov(bd2))
+cp2<-eigen(cor(bd2))
+
+cp1$values
+cp2$values
+
+#cumsum(cp1$values)/sum(cp1$values) 
+#cumsum(cp2$values)/sum(cp2$values)
+
+
+```
+como los valores de eigen valores acumulados seran una proporcion , los cuales se encontraran entre 0 y 1 , entonces todos los eigen vectores seran tomados en cuenta
+```{r}
+c1<-as.matrix(bd2)%*%cp2$vectors[,1]
+c2<-as.matrix(bd2)%*%cp2$vectors[,2]
+c3<-as.matrix(bd2)%*%cp2$vectors[,3]
+
+bd3<-cbind(bd2,c1,c2,c3)
+
+
+hist(bd3$c1)
+hist(bd3$c2)
+hist(bd3$c3)
+
+```
+
